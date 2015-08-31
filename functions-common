@@ -28,13 +28,16 @@
 # - ``REQUIREMENTS_DIR``
 # - ``STACK_USER``
 # - ``TRACK_DEPENDS``
-# - ``UNDO_REQUIREMENTS``
 # - ``http_proxy``, ``https_proxy``, ``no_proxy``
 #
 
 # Save trace setting
 XTRACE=$(set +o | grep xtrace)
 set +o xtrace
+
+# ensure we don't re-source this in the same environment
+[[ -z "$_DEVSTACK_FUNCTIONS_COMMON" ]] || return 0
+declare -r _DEVSTACK_FUNCTIONS_COMMON=1
 
 # Global Config Variables
 declare -A GITREPO

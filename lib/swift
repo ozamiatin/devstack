@@ -97,7 +97,7 @@ SWIFT_EXTRAS_MIDDLEWARE_LAST=${SWIFT_EXTRAS_MIDDLEWARE_LAST:-}
 # the beginning of the pipeline, before authentication middlewares.
 SWIFT_EXTRAS_MIDDLEWARE_NO_AUTH=${SWIFT_EXTRAS_MIDDLEWARE_NO_AUTH:-crossdomain}
 
-# The ring uses a configurable number of bits from a path’s MD5 hash as
+# The ring uses a configurable number of bits from a path's MD5 hash as
 # a partition index that designates a device. The number of bits kept
 # from the hash is known as the partition power, and 2 to the partition
 # power indicates the partition count. Partitioning the full MD5 hash
@@ -610,7 +610,7 @@ function create_swift_accounts {
 
     KEYSTONE_CATALOG_BACKEND=${KEYSTONE_CATALOG_BACKEND:-sql}
 
-    local another_role=$(openstack role list | awk "/ anotherrole / { print \$2 }")
+    local another_role=$(get_or_create_role "anotherrole")
 
     # NOTE(jroll): Swift doesn't need the admin role here, however Ironic uses
     # temp urls, which break when uploaded by a non-admin role
