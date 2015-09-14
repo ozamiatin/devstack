@@ -435,7 +435,7 @@ fi
 
 # Set up logging of screen windows
 # Set ``SCREEN_LOGDIR`` to turn on logging of screen windows to the
-# directory specified in ``SCREEN_LOGDIR``, we will log to the the file
+# directory specified in ``SCREEN_LOGDIR``, we will log to the file
 # ``screen-$SERVICE_NAME-$TIMESTAMP.log`` in that dir and have a link
 # ``screen-$SERVICE_NAME.log`` to the latest log file.
 # Logs are kept for as long specified in ``LOGDAYS``.
@@ -522,7 +522,7 @@ fi
 # Clone all external plugins
 fetch_plugins
 
-# Plugin Phase 0: override_defaults - allow pluggins to override
+# Plugin Phase 0: override_defaults - allow plugins to override
 # defaults before other services are run
 run_phase override_defaults
 
@@ -1373,8 +1373,15 @@ if [[ -x $TOP_DIR/local.sh ]]; then
     $TOP_DIR/local.sh
 fi
 
+# Sanity checks
+# =============
+
 # Check the status of running services
 service_check
+
+# ensure that all the libraries we think we installed from git,
+# actually were.
+check_libs_from_git
 
 
 # Bash completion
