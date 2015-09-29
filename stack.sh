@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
 # ``stack.sh`` is an opinionated OpenStack developer installation.  It
-# installs and configures various combinations of **Ceilometer**, **Cinder**,
-# **Glance**, **Heat**, **Horizon**, **Keystone**, **Nova**, **Neutron**,
-# and **Swift**
+# installs and configures various combinations of **Cinder**, **Glance**,
+# **Heat**, **Horizon**, **Keystone**, **Nova**, **Neutron**, and **Swift**
 
 # This script's options can be changed by setting appropriate environment
 # variables.  You can configure things like which git repositories to use,
@@ -27,13 +26,6 @@ set -o xtrace
 
 # Make sure custom grep options don't get in the way
 unset GREP_OPTIONS
-
-# Sanitize language settings to avoid commands bailing out
-# with "unsupported locale setting" errors.
-unset LANG
-unset LANGUAGE
-LC_ALL=C
-export LC_ALL
 
 # Make sure umask is sane
 umask 022
@@ -542,7 +534,6 @@ source $TOP_DIR/lib/glance
 source $TOP_DIR/lib/nova
 source $TOP_DIR/lib/cinder
 source $TOP_DIR/lib/swift
-source $TOP_DIR/lib/ceilometer
 source $TOP_DIR/lib/heat
 source $TOP_DIR/lib/neutron-legacy
 source $TOP_DIR/lib/ldap
@@ -826,13 +817,6 @@ if is_service_enabled horizon; then
     configure_horizon
 fi
 
-if is_service_enabled ceilometer; then
-    install_ceilometerclient
-    stack_install_service ceilometer
-    echo_summary "Configuring Ceilometer"
-    configure_ceilometer
-fi
-
 if is_service_enabled heat; then
     stack_install_service heat
     install_heat_other
@@ -1008,10 +992,6 @@ if is_service_enabled keystone; then
     create_cinder_accounts
     create_neutron_accounts
 
-    if is_service_enabled ceilometer; then
-        create_ceilometer_accounts
-    fi
-
     if is_service_enabled swift; then
         create_swift_accounts
     fi
@@ -1033,36 +1013,6 @@ if is_service_enabled keystone; then
     export OS_PASSWORD=$ADMIN_PASSWORD
     export OS_REGION_NAME=$REGION_NAME
 fi
-
-# We now have a working keystone. From this point, everything can be done
-# with normal auth. Let's write out the auth config files so that if something
-# goes wrong subsequently, developers debugging have stackrc and clouds.yaml
-# files to use to poke at things
-
-# Create account rc files
-# =======================
-
-# Creates source able script files for easier user switching.
-# This step also creates certificates for tenants and users,
-# which is helpful in image bundle steps.
-
-if is_service_enabled nova && is_service_enabled keystone; then
-    USERRC_PARAMS="-PA --target-dir $TOP_DIR/accrc"
-
-    if [ -f $SSL_BUNDLE_FILE ]; then
-        USERRC_PARAMS="$USERRC_PARAMS --os-cacert $SSL_BUNDLE_FILE"
-    fi
-
-    if [[ "$HEAT_STANDALONE" = "True" ]]; then
-        USERRC_PARAMS="$USERRC_PARAMS --heat-url http://$HEAT_API_HOST:$HEAT_API_PORT/v1"
-    fi
-
-    $TOP_DIR/tools/create_userrc.sh $USERRC_PARAMS
-fi
-
-
-# Save some values we generated for later use
-save_stackenv
 
 # Write a clouds.yaml file
 write_clouds_yaml
@@ -1225,7 +1175,7 @@ if is_service_enabled g-reg; then
     fi
 
     for image_url in ${IMAGE_URLS//,/ }; do
-        upload_image $image_url $TOKEN
+        upload_image $image_url
     done
 fi
 
@@ -1286,11 +1236,6 @@ if is_service_enabled cinder; then
     start_cinder
     create_volume_types
 fi
-if is_service_enabled ceilometer; then
-    echo_summary "Starting Ceilometer"
-    init_ceilometer
-    start_ceilometer
-fi
 
 # Configure and launch Heat engine, api and metadata
 if is_service_enabled heat; then
@@ -1304,6 +1249,32 @@ if is_service_enabled heat; then
         build_heat_pip_mirror
     fi
 fi
+
+
+# Create account rc files
+# =======================
+
+# Creates source able script files for easier user switching.
+# This step also creates certificates for tenants and users,
+# which is helpful in image bundle steps.
+
+if is_service_enabled nova && is_service_enabled keystone; then
+    USERRC_PARAMS="-PA --target-dir $TOP_DIR/accrc"
+
+    if [ -f $SSL_BUNDLE_FILE ]; then
+        USERRC_PARAMS="$USERRC_PARAMS --os-cacert $SSL_BUNDLE_FILE"
+    fi
+
+    if [[ "$HEAT_STANDALONE" = "True" ]]; then
+        USERRC_PARAMS="$USERRC_PARAMS --heat-url http://$HEAT_API_HOST:$HEAT_API_PORT/v1"
+    fi
+
+    $TOP_DIR/tools/create_userrc.sh $USERRC_PARAMS
+fi
+
+
+# Save some values we generated for later use
+save_stackenv
 
 
 # Wrapup configuration
