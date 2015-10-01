@@ -298,6 +298,12 @@ Example (Swift):
     SWIFT_USE_MOD_WSGI="True"
 
 
+Example (Cinder):
+
+::
+
+    CINDER_USE_MOD_WSGI="True"
+
 
 Libraries from Git
 ------------------
@@ -586,13 +592,6 @@ with ``VOLUME_BACKING_FILE_SIZE``.
         VOLUME_GROUP="stack-volumes"
         VOLUME_NAME_PREFIX="volume-"
         VOLUME_BACKING_FILE_SIZE=10250M
-
-
-Cinder v1 API is depricated and disabled by default. You can enable v1 API by
-setting ``CINDER_ENABLE_V1_API`` to ``True``.
-
-    ::
-        CINDER_ENABLE_V1_API=True
 
 
 Keystone
