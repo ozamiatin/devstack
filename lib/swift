@@ -130,9 +130,9 @@ SWIFT_MAX_HEADER_SIZE=${SWIFT_MAX_HEADER_SIZE:-16384}
 # Port bases used in port number calclution for the service "nodes"
 # The specified port number will be used, the additinal ports calculated by
 # base_port + node_num * 10
-OBJECT_PORT_BASE=${OBJECT_PORT_BASE:-6013}
-CONTAINER_PORT_BASE=${CONTAINER_PORT_BASE:-6011}
-ACCOUNT_PORT_BASE=${ACCOUNT_PORT_BASE:-6012}
+OBJECT_PORT_BASE=${OBJECT_PORT_BASE:-6613}
+CONTAINER_PORT_BASE=${CONTAINER_PORT_BASE:-6611}
+ACCOUNT_PORT_BASE=${ACCOUNT_PORT_BASE:-6612}
 
 # Enable tempurl feature
 SWIFT_ENABLE_TEMPURLS=${SWIFT_ENABLE_TEMPURLS:-False}
@@ -799,10 +799,10 @@ function stop_swift {
 
 function swift_configure_tempurls {
     OS_USERNAME=swift \
-        OS_TENANT_NAME=$SERVICE_TENANT_NAME \
+        OS_PROJECT_NAME=$SERVICE_TENANT_NAME \
         OS_PASSWORD=$SERVICE_PASSWORD \
-        OS_AUTH_URL=$KEYSTONE_AUTH_URI/v$IDENTITY_API_VERSION \
-        swift post -m "Temp-URL-Key: $SWIFT_TEMPURL_KEY"
+        OS_AUTH_URL=$SERVICE_ENDPOINT \
+        swift post --auth-version 3 -m "Temp-URL-Key: $SWIFT_TEMPURL_KEY"
 }
 
 # Restore xtrace
